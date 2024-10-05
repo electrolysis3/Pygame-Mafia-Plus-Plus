@@ -1,169 +1,130 @@
 import pygame
+import random
 
 # Initialize Pygame
 pygame.init()
 
-# SET UP GAME AND VARIABLES
+# Screen setup (increased screen size)
+WIDTH, HEIGHT = 1000, 800
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Role Assignment Game")
 
-screen = pygame.display.set_mode((1200, 800))
-roleindex = 0
-font = pygame.font.Font(None, 36)
-currentrole = "Sheriff"
-display_text = False
-# LOAD AND INITIALIZE IMAGES
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 
-# two of spades
-c2_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/2_of_spades.png")
-c2 = pygame.transform.scale(c2_1, (c2_1.get_width() // 1.5, c2_1.get_height() // 1.5))
-c2_rect = c2.get_rect()  # Get the Rect object for positioning
-# three of spades
-c3_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/3_of_spades.png")
-c3 = pygame.transform.scale(c3_1, (c3_1.get_width() // 1.5, c3_1.get_height() // 1.5))
-c3_rect = c3.get_rect() 
-# four of spades
-c4_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/4_of_spades.png")
-c4 = pygame.transform.scale(c4_1, (c4_1.get_width() // 1.5, c4_1.get_height() // 1.5))
-c4_rect = c4.get_rect() 
-# five of spades
-c5_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/5_of_spades.png")
-c5 = pygame.transform.scale(c5_1, (c5_1.get_width() // 1.5, c5_1.get_height() // 1.5))
-c5_rect = c5.get_rect() 
-# six of spades
-c6_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/6_of_spades.png")
-c6 = pygame.transform.scale(c6_1, (c6_1.get_width() // 1.5, c6_1.get_height() // 1.5))
-c6_rect = c6.get_rect() 
-# seven of spades
-c7_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/7_of_spades.png")
-c7 = pygame.transform.scale(c7_1, (c7_1.get_width() // 1.5, c7_1.get_height() // 1.5))
-c7_rect = c7.get_rect() 
-# eight of spades
-c8_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/8_of_spades.png")
-c8 = pygame.transform.scale(c8_1, (c8_1.get_width() // 1.5, c8_1.get_height() // 1.5))
-c8_rect = c8.get_rect() 
-# nine of spades
-c9_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/9_of_spades.png")
-c9 = pygame.transform.scale(c9_1, (c9_1.get_width() // 1.5, c9_1.get_height() // 1.5))
-c9_rect = c9.get_rect() 
-# ten of spades
-c10_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/10_of_spades.png")
-c10 = pygame.transform.scale(c10_1, (c10_1.get_width() // 1.5, c10_1.get_height() // 1.5))
-c10_rect = c10.get_rect() 
-# jack
-cj_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/jack_of_spades2.png")
-cj = pygame.transform.scale(cj_1, (cj_1.get_width() // 1.5, cj_1.get_height() // 1.5))
-cj_rect = cj.get_rect() 
-# queen
-cq_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/2_of_clubs.png")
-cq = pygame.transform.scale(cq_1, (cq_1.get_width() // 1.5, cq_1.get_height() // 1.5))
-cq_rect = cq.get_rect() 
-# king
-ck_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/king_of_spades2.png")
-ck = pygame.transform.scale(ck_1, (ck_1.get_width() // 1.5, ck_1.get_height() // 1.5))
-ck_rect = ck.get_rect() 
-# ace of spades
-ca_1 = pygame.image.load("D:/1_Jason\whattheleetcode\Playing Cards\Playing Cards\PNG-cards-1.3/ace_of_spades.png")
-ca = pygame.transform.scale(ca_1, (ca_1.get_width() // 1.5, ca_1.get_height() // 1.5))
-ca_rect = ca.get_rect()
+# Font
+font = pygame.font.SysFont(None, 40)
 
-# CARD POSITION
+# Roles and Cards
+roles = ["Spy", "Corrupt Mayor", "Veteran", "Child", "Jester", "Businessman"]
+cards = ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"]
 
-c2_rect.x = 450  # x position
-c2_rect.y = 100  # y position
+# Game variables
+num_players = 6
+players = {}
+round_num = 1
+game_over = False
+paused = True
+voting = False
+selected_player = None
+eliminated_player = None
 
-c3_rect.x = 450  # x position
-c3_rect.y = 100  # y position
+# Assign random roles to players
+def assign_roles():
+    random_roles = random.sample(roles, num_players)
+    for i in range(1, num_players + 1):
+        players[i] = {'role': random_roles[i-1], 'card': None, 'eliminated': False, 'rect': None}
 
-c4_rect.x = 450  # x position
-c4_rect.y = 100  # y position
+# Deal a card to each player
+def deal_cards():
+    for player in players:
+        if not players[player]['eliminated']:
+            players[player]['card'] = random.choice(cards)
 
-c5_rect.x = 450  # x position
-c5_rect.y = 100  # y position
+# Voting phase to eliminate a player
+def start_voting():
+    global voting
+    voting = True
 
-c6_rect.x = 450  # x position
-c6_rect.y = 100  # y position
+def eliminate_player(player_number):
+    players[player_number]['eliminated'] = True
+    return player_number
 
-c7_rect.x = 450  # x position
-c7_rect.y = 100  # y position
+# Main game loop
+def main():
+    global round_num, game_over, paused, voting, selected_player, eliminated_player
 
-c8_rect.x = 450  # x position
-c8_rect.y = 100  # y position
+    assign_roles()
+    
+    clock = pygame.time.Clock()
 
-c9_rect.x = 450  # x position
-c9_rect.y = 100  # y position
-
-c10_rect.x = 450  # x position
-c10_rect.y = 100  # y position
-
-cj_rect.x = 450  # x position
-cj_rect.y = 100  # y position
-
-cq_rect.x = 450  # x position
-cq_rect.y = 100  # y position
-
-ck_rect.x = 450  # x position
-ck_rect.y = 100  # y position
-
-ca_rect.x = 450  # x position
-ca_rect.y = 100  # y position
-
-
-# TEXT STUFF
-
-role_surface = font.render('Role: ' + currentrole, True, (0, 0, 0))
-
-# Get the rectangle of the text
-role_rect = role_surface.get_rect()
-role_rect.center = (600, 600)  # Set text position to the center of the screen
-
-# START START
-
-font = pygame.font.Font(None, 74)
-small_font = pygame.font.Font(None, 36)
-title_surface = font.render('My Game', True, (0, 0, 0))
-instruction_surface = small_font.render('Press any key to start', True, (0, 0, 0))
-
-# Function for the start screen
-def start_screen():
-    while waiting:
-        screen.fill(WHITE)
-        
-        # Draw the title and instruction text
-        screen.blit(title_surface, (250, 200))
-        screen.blit(instruction_surface, (250, 400))
-        
-        # Update the display
-        pygame.display.flip()
-        
-        # Check for user input
+    while not game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                waiting = False  # Exit the start screen and begin the game
-
-# MAIN GAME
-def main_screen():
-    running = True
-    while running:
-        # Clear the screen
-        screen.fill((255, 255, 255))  # fill with white
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-            # Check for key press event
+                game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:  # Space key pressed
-                    display_text = True
-        # Draw the image at the new position
-        if display_text:
-            screen.blit(ca, ca_rect)
-        screen.blit(role_surface, role_rect)
+                if event.key == pygame.K_SPACE:  # Press space to proceed to the next round
+                    if not voting:
+                        paused = False
 
-        # Update the display
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if voting:
+                    mouse_pos = event.pos
+                    # Check if a player was clicked
+                    for player, info in players.items():
+                        if not info['eliminated'] and info['rect'] and info['rect'].collidepoint(mouse_pos):
+                            selected_player = player
+                            eliminated_player = eliminate_player(player)
+                            voting = False
+                            paused = True  # Pause after voting
+
+        screen.fill(WHITE)
+
+        if round_num <= 10:
+            # Show roles and cards
+            y_pos = 50
+            for player, info in players.items():
+                if not info['eliminated']:
+                    role_text = font.render(f"Player {player} - Role: {info['role']}", True, BLACK)
+                    card_text = font.render(f"Card: {info['card']}" if info['card'] else "Card: None", True, BLACK)
+                    rect = pygame.Rect(50, y_pos, 400, 40)  # Rect for clickable area
+                    players[player]['rect'] = rect
+                    pygame.draw.rect(screen, BLACK, rect, 2)
+                    screen.blit(role_text, (50, y_pos))
+                    screen.blit(card_text, (500, y_pos))
+                else:
+                    elim_text = font.render(f"Player {player} - Eliminated", True, RED)
+                    screen.blit(elim_text, (50, y_pos))
+                y_pos += 80  # Increase spacing to prevent overlap
+
+            if paused and not voting:
+                # Prompt to press space to continue
+                prompt_text = font.render("Press SPACE to continue", True, BLACK)
+                screen.blit(prompt_text, (WIDTH // 2 - 150, HEIGHT - 100))
+            elif not paused:
+                # Deal cards every round
+                if round_num % 2 != 0:
+                    deal_cards()
+                else:
+                    # Start voting phase
+                    start_voting()
+                
+                round_num += 1
+                paused = True  # Pause after each round
+            
+            if voting:
+                vote_text = font.render("Click a player to vote them out!", True, BLACK)
+                screen.blit(vote_text, (WIDTH // 2 - 200, HEIGHT - 100))
+        else:
+            game_over_text = font.render("Game Over!", True, BLACK)
+            screen.blit(game_over_text, (WIDTH // 2 - 100, HEIGHT // 2))
+        
         pygame.display.flip()
+        clock.tick(60)
 
-# START GAME SEQUENCE
-start_screen
-main_screen
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
